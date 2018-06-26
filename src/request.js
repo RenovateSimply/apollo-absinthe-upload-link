@@ -23,6 +23,7 @@ const request = (opts) => {
     const { lengthComputable, loaded, total } = progressEvent;
     if (lengthComputable) {
       const detail = {
+        formData: opts.body,
         progress: loaded / total,
       };
       const event = new CustomEvent('progressEvent', { detail });
