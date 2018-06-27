@@ -27,8 +27,8 @@ const request = opts =>
           window.dispatchEvent(event);
         }
       },
-      (error) => console.log(error),
-      () => console.log('complete'),
+      () => { /* error */ },
+      () => { /* complete */ },
     ),
   }).map(({ response }) => response)
 
