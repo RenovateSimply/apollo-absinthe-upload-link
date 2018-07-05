@@ -4,7 +4,6 @@ import { printAST } from 'apollo-client'
 import request from './request'
 import extractFiles from './extractFiles'
 import { isObject } from './validators'
-import 'formdata-polyfill'
 
 export const createUploadMiddleware = ({ uri, headers }) =>
   new ApolloLink((operation, forward) => {
