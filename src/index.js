@@ -22,6 +22,7 @@ export const createUploadMiddleware = ({ uri, headers }) =>
           uri,
           body: formData,
           headers: { ...contextHeaders, ...headers },
+          files,
         })
       }
     }
