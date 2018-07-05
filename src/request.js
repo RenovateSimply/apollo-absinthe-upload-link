@@ -2,6 +2,7 @@ import { Observable } from 'rxjs/Observable'
 import { Subscriber } from 'rxjs/Subscriber'
 import 'rxjs/add/observable/dom/ajax'
 import 'rxjs/add/operator/map'
+import CustomEvent from 'custom-event';
 
 /**
  * Request function
