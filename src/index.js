@@ -16,7 +16,13 @@ export const createUploadMiddleware = ({ uri, headers }) =>
 
         formData.append('query', printAST(operation.query))
         formData.append('variables', JSON.stringify(variables))
-        files.forEach(({ name, file }) => formData.append(name, file))
+
+        /**
+         * Third param in append specifies filename.
+         *
+         * Ref: https://developer.mozilla.org/en-US/docs/Web/API/FormData/append
+         */
+        files.forEach(({ name, file }) => formData.append(name, file, file.name))
 
         return request({
           uri,
