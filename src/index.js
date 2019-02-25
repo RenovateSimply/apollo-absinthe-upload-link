@@ -1,20 +1,23 @@
 import { HttpLink } from 'apollo-link-http'
 import { ApolloLink, concat } from 'apollo-link'
-import { printAST } from 'apollo-client'
+import { print } from 'graphql/language/printer'
 import request from './request'
 import extractFiles from './extractFiles'
 import { isObject } from './validators'
+import { parseAndCheckHttpResponse } from 'apollo-link-http-common'
+import { Observable } from 'apollo-link'
 
-export const createUploadMiddleware = ({ uri, headers }) =>
+export const createUploadMiddleware = ({ uri, headers, fetch }) =>
   new ApolloLink((operation, forward) => {
     if (typeof FormData !== 'undefined' && isObject(operation.variables)) {
       const { variables, files } = extractFiles(operation.variables)
 
       if (files.length > 0) {
-        const { headers: contextHeaders } = operation.getContext()
+        const context = operation.getContext()
+        const { headers: contextHeaders } = context
         const formData = new FormData()
 
-        formData.append('query', printAST(operation.query))
+        formData.append('query', print(operation.query))
         formData.append('variables', JSON.stringify(variables))
 
         /**
@@ -24,12 +27,45 @@ export const createUploadMiddleware = ({ uri, headers }) =>
          */
         files.forEach(({ name, file }) => formData.append(name, file, file.name))
 
-        return request({
-          uri,
+        let options = {
+          method: 'POST',
+          headers: Object.assign({}, contextHeaders, headers),
           body: formData,
-          headers: { ...contextHeaders, ...headers },
-          files,
-        })
+        }
+
+        // add context.fetchOptions to fetch options
+        options = Object.assign(context.fetchOptions || {}, options)
+
+        // is there a custom fetch? then use it
+        if (fetch) {
+          return new Observable(observer => {
+            fetch(uri, options)
+              .then(response => {
+                operation.setContext({ response })
+                return response
+              })
+              .then(parseAndCheckHttpResponse(operation))
+              .then(result => {
+                // we have data and can send it to back up the link chain
+                observer.next(result)
+                observer.complete()
+                return result
+              })
+              .catch(err => {
+                if (err.result && err.result.errors && err.result.data) {
+                  observer.next(err.result)
+                }
+                observer.error(err)
+              })
+          })
+        } else {
+          return request({
+            uri,
+            body: formData,
+            headers: Object.assign({}, contextHeaders, headers),
+            files
+          })
+        }
       }
     }
 

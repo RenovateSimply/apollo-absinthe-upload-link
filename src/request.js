@@ -1,7 +1,6 @@
-import { Observable } from 'rxjs/Observable'
+import { ajax } from 'rxjs/ajax'
+import { map } from 'rxjs/operators'
 import { Subscriber } from 'rxjs/Subscriber'
-import 'rxjs/add/observable/dom/ajax'
-import 'rxjs/add/operator/map'
 import CustomEvent from 'custom-event';
 
 /**
@@ -10,7 +9,7 @@ import CustomEvent from 'custom-event';
  * @param {Object} opts
  */
 const request = opts =>
-  Observable.ajax({
+  ajax({
     url: opts.uri,
     body: opts.body,
     method: 'POST',
@@ -31,6 +30,6 @@ const request = opts =>
       () => { /* error */ },
       () => { /* complete */ },
     ),
-  }).map(({ response }) => response)
+  }).pipe(map(({ response }) => response))
 
 export default request

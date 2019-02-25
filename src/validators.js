@@ -1,9 +1,11 @@
 export const isObject = value => value !== null && typeof value === 'object'
+
 export const isFileList = value =>
   typeof FileList !== 'undefined' && value instanceof FileList
 
 export const isUploadFile = value =>
   (typeof File !== 'undefined' && value instanceof File) ||
+  (typeof Blob !== 'undefined' && value instanceof Blob) ||
   value instanceof ReactNativeFile
 
 /**
@@ -49,5 +51,6 @@ export class ReactNativeFile {
    *   name: 'photo-2.jpg'
    * }])
    */
-  static list = files => files.map(file => new ReactNativeFile(file))
 }
+
+ReactNativeFile.list = files => files.map(file => new ReactNativeFile(file))
